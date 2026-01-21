@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoltenHub Admin</title>
+  <style>
+    :root{
+      --bg0:#050607; --bg1:#07090b;
+      --panel:rgba(14,17,20,.72); --panel2:rgba(18,22,26,.72);
+      --stroke:rgba(255,255,255,.08);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.62);
+      --muted2:rgba(255,255,255,.45);
+      --accent:#73c7ff;
+      --accent2:rgba(115,199,255,.18);
+      --shadow:0 16px 50px rgba(0,0,0,.55);
+      --radius:22px;
+      --focus:0 0 0 3px rgba(115,199,255,.28);
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; overflow:hidden;
+      background:
+        radial-gradient(1200px 600px at 30% 10%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(800px 500px at 80% 0%, rgba(115,199,255,.06), transparent 60%),
+        linear-gradient(180deg,var(--bg0),var(--bg1));
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    .wrap{height:100%; display:grid; place-items:center; padding:18px}
+    .card{
+      width:min(980px, 96vw);
+      border-radius:var(--radius);
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .head{
+      padding:14px 14px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      border-bottom:1px solid var(--stroke);
+      font-weight:950;
+    }
+    .body{padding:14px}
+    .grid{display:grid; gap:14px}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .small{font-size:12px; color:var(--muted2)}
+    .muted{color:var(--muted)}
+    .btn{
+      border-radius:16px; padding:12px 14px;
+      border:1px solid var(--stroke);
+      background:rgba(10,12,14,.55);
+      color:var(--text);
+      cursor:pointer;
+      transition:transform 120ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+      user-select:none;
+    }
+    .btn.primary{
+      border-color:rgba(255,255,255,.10);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)),
+        radial-gradient(80% 120% at 50% 0%, var(--accent2), transparent 60%);
+      font-weight:950;
+    }
+    .btn:active{transform:scale(.98)}
+    input, textarea, select{
+      border:1px solid var(--stroke);
+      background:rgba(10,12,14,.35);
+      color:var(--text);
+      border-radius:14px;
+      padding:10px 12px;
+      outline:none;
+    }
+    input:focus, textarea:focus, select:focus{box-shadow:var(--focus)}
+    textarea{min-height:90px; width:100%; resize:vertical}
+    .split{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px}
+    @media (max-width: 900px){ .split{grid-template-columns:1fr} }
+    .box{
+      border:1px solid var(--stroke);
+      background:rgba(10,12,14,.25);
+      border-radius:18px;
+      padding:12px;
+    }
+    .mods{display:grid; gap:10px}
+    .modRow{
+      border:1px solid var(--stroke);
+      background:rgba(10,12,14,.22);
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      gap:12px;
+      justify-content:space-between;
+      align-items:flex-start;
+    }
+    .modName{font-weight:950}
+    .pill{
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(10,12,14,.35);
+      font-size:12px; color:var(--muted);
+    }
+    .checks{display:flex; gap:8px; flex-wrap:wrap}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div>MoltenHub Admin</div>
+      <div class="row">
+        <a class="btn" href="/" style="text-decoration:none;">Back to site</a>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid">
+
+        <div class="box">
+          <div style="font-weight:950;">Admin Key</div>
+          <div class="small">This is your secret key (Vercel env <b>ADMIN_KEY</b>). It never gets saved on the server; only in your browser.</div>
+          <div class="row" style="margin-top:10px;">
+            <input id="adminKey" type="password" placeholder="Paste ADMIN_KEY here" style="flex:1; min-width:240px;" />
+            <button class="btn primary" id="btnSaveKey">Save</button>
+            <button class="btn" id="btnClearKey">Clear</button>
+          </div>
+          <div class="small" id="keyStatus" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="split">
+          <div class="box">
+            <div style="font-weight:950;">Add a Mod</div>
+            <div class="small">Fill this in like a clean form — then upload.</div>
+
+            <div class="grid" style="gap:10px; margin-top:12px;">
+              <input id="name" type="text" placeholder="Mod name" />
+              <textarea id="desc" placeholder="Description (what it does, features, etc.)"></textarea>
+
+              <div class="row">
+                <input id="mcver" type="text" placeholder="Minecraft version (e.g. 1.20.1)" style="flex:1; min-width:200px;" />
+                <label class="row" style="gap:8px;">
+                  <input id="fabric" type="checkbox" />
+                  <span class="small">Fabric required</span>
+                </label>
+              </div>
+
+              <div class="box" style="padding:10px;">
+                <div class="small">Works on (adds green checkmarks on the user page)</div>
+                <div class="checks" style="margin-top:10px;">
+                  <label class="row"><input type="checkbox" class="launcher" value="Modrinth" /> <span class="small">Modrinth</span></label>
+                  <label class="row"><input type="checkbox" class="launcher" value="CurseForge" /> <span class="small">CurseForge</span></label>
+                  <label class="row"><input type="checkbox" class="launcher" value="Prism" /> <span class="small">Prism</span></label>
+                  <label class="row"><input type="checkbox" class="launcher" value="MultiMC" /> <span class="small">MultiMC</span></label>
+                  <label class="row"><input type="checkbox" class="launcher" value="ATLauncher" /> <span class="small">ATLauncher</span></label>
+                </div>
+              </div>
+
+              <div class="box" style="padding:10px;">
+                <div style="font-weight:900;">Upload file</div>
+                <div class="small">Uploads to Supabase Storage (bucket: <b>mods</b>), NOT GitHub.</div>
+                <div class="row" style="margin-top:10px;">
+                  <input id="file" type="file" />
+                </div>
+              </div>
+
+              <div class="row">
+                <button class="btn primary" id="btnUpload">Upload + Create Mod</button>
+                <span class="pill" id="uploadState">Idle</span>
+              </div>
+
+              <div class="small" id="formStatus"></div>
+            </div>
+          </div>
+
+          <div class="box">
+            <div class="row" style="justify-content:space-between;">
+              <div>
+                <div style="font-weight:950;">Existing Mods</div>
+                <div class="small">Edit/delete from here.</div>
+              </div>
+              <button class="btn" id="btnReload">Reload</button>
+            </div>
+
+            <div style="height:10px"></div>
+            <div id="mods" class="mods"></div>
+            <div class="small" id="modsStatus"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const LS_KEY = "moltenhub.admin.key.v1";
+
+  function getKey(){ return localStorage.getItem(LS_KEY) || ""; }
+  function setKey(v){ localStorage.setItem(LS_KEY, v); }
+  function clearKey(){ localStorage.removeItem(LS_KEY); }
+
+  const adminKeyEl = document.getElementById("adminKey");
+  const keyStatus = document.getElementById("keyStatus");
+  adminKeyEl.value = getKey();
+
+  document.getElementById("btnSaveKey").addEventListener("click", ()=>{
+    const v = adminKeyEl.value.trim();
+    if (!v) { keyStatus.textContent = "Enter a key first."; return; }
+    setKey(v);
+    keyStatus.textContent = "Saved.";
+  });
+  document.getElementById("btnClearKey").addEventListener("click", ()=>{
+    clearKey();
+    adminKeyEl.value = "";
+    keyStatus.textContent = "Cleared.";
+  });
+
+  function authHeaders(){
+    const k = getKey();
+    return { "Authorization": "Bearer " + k, "Content-Type": "application/json" };
+  }
+
+  function qLaunchers(){
+    return [...document.querySelectorAll(".launcher:checked")].map(x=>x.value);
+  }
+
+  async function reloadMods(){
+    const modsStatus = document.getElementById("modsStatus");
+    const modsWrap = document.getElementById("mods");
+    modsWrap.innerHTML = "";
+    modsStatus.textContent = "Loading…";
+    try {
+      const r = await fetch("/api/mods", { cache:"no-store" });
+      const data = await r.json();
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (!items.length) {
+        modsStatus.textContent = "No mods yet.";
+        return;
+      }
+      modsStatus.textContent = "";
+
+      for (const it of items) {
+        const row = document.createElement("div");
+        row.className = "modRow";
+        row.innerHTML = `
+          <div style="min-width:0;">
+            <div class="modName">${it.name}</div>
+            <div class="small">${it.minecraft_version} • Fabric: ${it.fabric_required ? "Yes" : "No"}</div>
+            <div class="small">File: <span class="muted">${it.file_name}</span></div>
+          </div>
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn" data-act="edit">Edit</button>
+            <button class="btn" data-act="del">Delete</button>
+          </div>
+        `;
+
+        row.querySelector('[data-act="del"]').addEventListener("click", async ()=>{
+          if (!confirm("Delete this mod?")) return;
+          const r2 = await fetch(`/api/mods-id?id=${encodeURIComponent(it.id)}`, {
+            method: "DELETE",
+            headers: authHeaders()
+          });
+          const d2 = await r2.json().catch(()=> ({}));
+          if (!r2.ok) { alert("Delete failed: " + (d2.error || r2.status)); return; }
+          reloadMods();
+        });
+
+        row.querySelector('[data-act="edit"]').addEventListener("click", async ()=>{
+          // Simple edit: load into form (you can re-upload file if needed)
+          document.getElementById("name").value = it.name || "";
+          document.getElementById("desc").value = it.description || "";
+          document.getElementById("mcver").value = it.minecraft_version || "";
+          document.getElementById("fabric").checked = !!it.fabric_required;
+
+          document.querySelectorAll(".launcher").forEach(ch=>{
+            ch.checked = (Array.isArray(it.launchers) ? it.launchers : []).includes(ch.value);
+          });
+
+          document.getElementById("formStatus").textContent =
+            `Loaded "${it.name}" into the form. Upload a new file if you want, then click Upload + Create (or use PATCH manually).`;
+
+          // (Optional) You can add an "Update" button later; kept simple + safe for reset.
+        });
+
+        modsWrap.appendChild(row);
+      }
+
+    } catch (e) {
+      modsStatus.textContent = "Failed to load mods.";
+    }
+  }
+
+  document.getElementById("btnReload").addEventListener("click", reloadMods);
+
+  async function uploadAndCreate(){
+    const state = document.getElementById("uploadState");
+    const status = document.getElementById("formStatus");
+
+    const name = document.getElementById("name").value.trim();
+    const description = document.getElementById("desc").value.trim();
+    const minecraft_version = document.getElementById("mcver").value.trim();
+    const fabric_required = document.getElementById("fabric").checked;
+    const launchers = qLaunchers();
+    const file = document.getElementById("file").files[0];
+
+    if (!getKey()) { status.textContent = "Missing Admin Key."; return; }
+    if (!name || !minecraft_version) { status.textContent = "Enter mod name + Minecraft version."; return; }
+    if (!file) { status.textContent = "Choose a file to upload."; return; }
+
+    state.textContent = "Signing…";
+    status.textContent = "";
+
+    // 1) Ask server for signed upload URL
+    const signRes = await fetch("/api/upload-sign", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ file_name: file.name })
+    });
+    const sign = await signRes.json().catch(()=> ({}));
+    if (!signRes.ok) {
+      status.textContent = "Sign failed: " + (sign.error || signRes.status);
+      state.textContent = "Idle";
+      return;
+    }
+
+    // 2) Upload to Supabase signed URL
+    state.textContent = "Uploading…";
+    try {
+      const up = await fetch(sign.signed_url, {
+        method: "PUT",
+        headers: { "Content-Type": file.type || "application/octet-stream" },
+        body: file
+      });
+      if (!up.ok) {
+        status.textContent = "Upload failed (signed URL).";
+        state.textContent = "Idle";
+        return;
+      }
+    } catch (e) {
+      status.textContent = "Upload failed: " + String(e.message || e);
+      state.textContent = "Idle";
+      return;
+    }
+
+    // 3) Create mod record in DB
+    state.textContent = "Saving…";
+    const createRes = await fetch("/api/mods", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        name,
+        description,
+        minecraft_version,
+        fabric_required,
+        launchers,
+        file_name: file.name,
+        file_url: sign.public_url
+      })
+    });
+    const created = await createRes.json().catch(()=> ({}));
+    if (!createRes.ok) {
+      status.textContent = "Create failed: " + (created.error || createRes.status);
+      state.textContent = "Idle";
+      return;
+    }
+
+    state.textContent = "Done ✅";
+    status.textContent = "Uploaded + created mod!";
+    document.getElementById("file").value = "";
+    reloadMods();
+  }
+
+  document.getElementById("btnUpload").addEventListener("click", uploadAndCreate);
+
+  reloadMods();
+</script>
+</body>
+</html>
